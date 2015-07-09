@@ -30,3 +30,10 @@
 -keep class * extends android.support.design.widget.CoordinatorLayout$Behavior {
     *;
 }
+
+
+# Realm
+
+-keep @io.realm.annotations.RealmModule class *
+-dontwarn javax.**
+-dontwarn io.realm.**

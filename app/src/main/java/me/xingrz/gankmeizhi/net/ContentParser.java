@@ -24,13 +24,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class ArticleParser {
+public class ContentParser {
 
     private static final String TAG = "ArticleParser";
 
     @Nullable
-    public static Article parse(String html) {
-        Article article = new Article();
+    public static Content parse(String html) {
+        Content article = new Content();
 
         Document document = Jsoup.parse(html);
 
@@ -43,6 +43,12 @@ public class ArticleParser {
         Element meta = content.select("> .ds-thread").first();
         if (meta == null) {
             Log.e(TAG, "meta not found");
+            return null;
+        }
+
+        article.key = meta.attr("data-thread-key");
+        if (article.key.isEmpty()) {
+            Log.e(TAG, "meta no thread key");
             return null;
         }
 
@@ -59,11 +65,17 @@ public class ArticleParser {
             Log.e(TAG, "meta no url");
             return null;
         } else if (!article.url.startsWith(ArticleRequestFactory.URL)) {
-            Log.e(TAG, "url wrong prefix");
+            Log.e(TAG, "url wrong prefix " + article.url);
             return null;
         }
 
         article.url = article.url.substring(ArticleRequestFactory.URL.length());
+
+        if (!"/".equals(article.url) && !article.url.matches("^/\\d{4}/\\d{2}/\\d{2}$")) {
+            Log.e(TAG, "invalid url " + article.url);
+            return null;
+        }
+
         Log.d(TAG, "url: " + article.url);
 
         Elements sibling = content.select("> .row .six.columns p");

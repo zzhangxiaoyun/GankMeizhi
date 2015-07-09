@@ -16,14 +16,12 @@
 
 package me.xingrz.gankmeizhi.net;
 
-import com.squareup.okhttp.Request;
+import android.graphics.Point;
 
-public class ArticleRequestFactory {
+import java.io.IOException;
 
-    public static final String URL = "http://gank.io";
+public interface ImageFetcher {
 
-    public static Request make(String path) {
-        return new Request.Builder().url(URL + path).build();
-    }
+    void prefetchImage(String url, Point measured) throws IOException;
 
 }

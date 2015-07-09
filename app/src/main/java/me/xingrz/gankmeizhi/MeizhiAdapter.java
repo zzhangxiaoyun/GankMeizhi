@@ -22,19 +22,41 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import me.xingrz.gankmeizhi.db.Article;
+import me.xingrz.gankmeizhi.db.Image;
+import me.xingrz.gankmeizhi.widget.RadioImageView;
 
 public class MeizhiAdapter extends RecyclerView.Adapter<MeizhiAdapter.ViewHolder> {
 
     private final Context context;
     private final LayoutInflater inflater;
 
+    private List<Image> images = new ArrayList<>();
+
     public MeizhiAdapter(Context context) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
+        setHasStableIds(true);
+    }
+
+    public void reload(List<Article> articles) {
+        images.clear();
+
+        for (Article article : articles) {
+            for (Image image : article.getImages()) {
+                images.add(image);
+            }
+        }
+
+        notifyDataSetChanged();
     }
 
     @Override
@@ -44,27 +66,25 @@ public class MeizhiAdapter extends RecyclerView.Adapter<MeizhiAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if (position % 3 == 0) {
-            holder.textView.getLayoutParams().height = 300;
-            holder.textView.setText(String.format("%d\n3", position));
-        } else if (position % 5 == 0) {
-            holder.textView.getLayoutParams().height = 500;
-            holder.textView.setText(String.format("%d\n5", position));
-        } else {
-            holder.textView.getLayoutParams().height = 800;
-            holder.textView.setText(String.format("%d\n8", position));
-        }
+        Image image = images.get(position);
+        holder.imageView.setOriginalSize(image.getWidth(), image.getHeight());
+        Picasso.with(context).load(image.getUrl()).into(holder.imageView);
     }
 
     @Override
     public int getItemCount() {
-        return 100;
+        return images.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return images.get(position).getUrl().hashCode();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.text)
-        public TextView textView;
+        @Bind(R.id.image)
+        public RadioImageView imageView;
 
         public ViewHolder(@LayoutRes int resource, ViewGroup parent) {
             super(inflater.inflate(resource, parent, false));

@@ -14,24 +14,39 @@
  * limitations under the License.
  */
 
-package me.xingrz.gankmeizhi.net;
+package me.xingrz.gankmeizhi.db;
 
-import android.support.annotation.Nullable;
+import io.realm.RealmObject;
 
-import java.util.ArrayList;
-import java.util.List;
+public class Image extends RealmObject {
 
-public class Article {
+    private String url;
 
-    public String url;
-    public String title;
+    private int width;
+    private int height;
 
-    public List<String> images = new ArrayList<>();
+    public String getUrl() {
+        return url;
+    }
 
-    @Nullable
-    public String later;
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-    @Nullable
-    public String earlier;
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
 
 }

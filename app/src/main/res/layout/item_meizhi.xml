@@ -20,13 +20,12 @@
     android:layout_height="match_parent"
     android:foreground="?selectableItemBackground">
 
-    <TextView
-        android:id="@+id/text"
+    <me.xingrz.gankmeizhi.widget.RadioImageView
+        android:id="@+id/image"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/primary_light"
-        android:fontFamily="sans-serif-light"
-        android:gravity="center"
-        tools:text="2\n5" />
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        tools:ignore="ContentDescription"
+        tools:src="@color/primary_light" />
 
 </FrameLayout>
