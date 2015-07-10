@@ -79,10 +79,8 @@ public class MainActivity extends AppCompatActivity
         adapter = new MeizhiAdapter(this);
 
         layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
 
         content.setAdapter(adapter);
-        content.addItemDecoration(new MeizhiItemDecoration(this));
         content.setLayoutManager(layoutManager);
         content.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
