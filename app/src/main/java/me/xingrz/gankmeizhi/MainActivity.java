@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(toolbar);
 
+        refresher.setColorSchemeResources(R.color.primary);
         refresher.setOnRefreshListener(this);
 
         realm = Realm.getInstance(this);
