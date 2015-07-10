@@ -25,38 +25,20 @@ import android.view.ViewGroup;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import me.xingrz.gankmeizhi.db.Article;
-import me.xingrz.gankmeizhi.db.Image;
+import me.xingrz.gankmeizhi.widget.ArrayRecyclerAdapter;
 import me.xingrz.gankmeizhi.widget.RadioImageView;
 
-public class MeizhiAdapter extends RecyclerView.Adapter<MeizhiAdapter.ViewHolder> {
+public class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, MeizhiAdapter.ViewHolder> {
 
     private final Context context;
     private final LayoutInflater inflater;
-
-    private List<Image> images = new ArrayList<>();
 
     public MeizhiAdapter(Context context) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         setHasStableIds(true);
-    }
-
-    public void reload(List<Article> articles) {
-        images.clear();
-
-        for (Article article : articles) {
-            for (Image image : article.getImages()) {
-                images.add(image);
-            }
-        }
-
-        notifyDataSetChanged();
     }
 
     @Override
@@ -66,19 +48,14 @@ public class MeizhiAdapter extends RecyclerView.Adapter<MeizhiAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Image image = images.get(position);
-        holder.imageView.setOriginalSize(image.getWidth(), image.getHeight());
-        Picasso.with(context).load(image.getUrl()).into(holder.imageView);
-    }
-
-    @Override
-    public int getItemCount() {
-        return images.size();
+        ImageWrapper image = get(position);
+        holder.imageView.setOriginalSize(image.width, image.height);
+        Picasso.with(context).load(image.url).into(holder.imageView);
     }
 
     @Override
     public long getItemId(int position) {
-        return images.get(position).getUrl().hashCode();
+        return get(position).url.hashCode();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

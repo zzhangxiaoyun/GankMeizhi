@@ -28,7 +28,9 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -36,6 +38,7 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import me.xingrz.gankmeizhi.db.Article;
+import me.xingrz.gankmeizhi.db.Image;
 
 public class MainActivity extends AppCompatActivity
         implements SwipeRefreshLayout.OnRefreshListener, RealmChangeListener {
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity
         adapter = new MeizhiAdapter(this);
 
         layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
 
         content.setAdapter(adapter);
         content.addItemDecoration(new MeizhiItemDecoration(this));
@@ -123,8 +127,18 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onChange() {
-        adapter.reload(realm.where(Article.class).findAllSorted(
-                "date", RealmResults.SORT_ORDER_DESCENDING));
+        List<Article> articles = realm.where(Article.class)
+                .findAllSorted("date", RealmResults.SORT_ORDER_DESCENDING);
+
+        List<ImageWrapper> images = new ArrayList<>();
+
+        for (Article article : articles) {
+            for (Image image : article.getImages()) {
+                images.add(ImageWrapper.from(article, image));
+            }
+        }
+
+        adapter.replaceWith(images);
     }
 
     private void onScrolled() {
