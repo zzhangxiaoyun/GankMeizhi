@@ -28,6 +28,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnPageChange;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import me.xingrz.gankmeizhi.db.Image;
@@ -81,14 +82,6 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
 
         pager.setAdapter(adapter);
         pager.setCurrentItem(getIntent().getIntExtra("index", 0));
-        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                if (state == ViewPager.SCROLL_STATE_DRAGGING) {
-                    hideSystemUi();
-                }
-            }
-        });
     }
 
     @Override
@@ -102,6 +95,14 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
     public void onChange() {
         images = Image.all(realm);
         adapter.notifyDataSetChanged();
+    }
+
+    @OnPageChange(value = R.id.pager, callback = OnPageChange.Callback.PAGE_SCROLL_STATE_CHANGED)
+    @SuppressWarnings("unused")
+    void onPageChange(int state) {
+        if (state == ViewPager.SCROLL_STATE_DRAGGING) {
+            hideSystemUi();
+        }
     }
 
     public void toggleToolbar() {

@@ -28,6 +28,7 @@ import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class ViewerFragment extends Fragment {
 
@@ -55,18 +56,18 @@ public class ViewerFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         ButterKnife.bind(this, view);
-        image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((ViewerActivity) getActivity()).toggleToolbar();
-            }
-        });
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Picasso.with(getActivity()).load(getArguments().getString("url")).into(image);
+    }
+
+    @OnClick(R.id.image)
+    @SuppressWarnings("unused")
+    void toggleToolbar() {
+        ((ViewerActivity) getActivity()).toggleToolbar();
     }
 
 }
