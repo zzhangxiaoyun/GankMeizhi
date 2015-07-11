@@ -24,6 +24,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.List;
 
 import butterknife.Bind;
@@ -89,6 +91,18 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
         super.onDestroy();
         realm.removeChangeListener(this);
         realm.close();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     @Override

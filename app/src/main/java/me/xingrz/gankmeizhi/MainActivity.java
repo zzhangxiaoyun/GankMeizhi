@@ -29,6 +29,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +65,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        MobclickAgent.updateOnlineConfig(this);
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
@@ -111,6 +115,8 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
+        MobclickAgent.onResume(this);
+
         registerReceiver(updateResultReceiver,
                 new IntentFilter(MeizhiFetchingService.ACTION_UPDATE_RESULT),
                 MeizhiFetchingService.PERMISSION_ACCESS_UPDATE_RESULT, null);
@@ -122,12 +128,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        MobclickAgent.onPause(this);
         unregisterReceiver(updateResultReceiver);
     }
 
     @Override
     public void onRefresh() {
         fetchForward();
+        MobclickAgent.onEvent(this, "refresh");
     }
 
     @Override
