@@ -40,6 +40,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ViewerActivity"
+            android:theme="@style/AppTheme.Viewer" />
+
         <service android:name=".MeizhiFetchingService" />
 
     </application>

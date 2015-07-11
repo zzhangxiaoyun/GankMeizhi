@@ -72,7 +72,7 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         Realm realm = Realm.getInstance(this);
 
         RealmResults<Article> latest = realm.where(Article.class)
-                .findAllSorted("date", RealmResults.SORT_ORDER_DESCENDING);
+                .findAllSorted("order", RealmResults.SORT_ORDER_DESCENDING);
 
         int fetched = 0;
 
@@ -87,6 +87,8 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
                 fetched = fetchBackward(realm, latest.last().getEarlier(), 10);
             }
         }
+
+        realm.close();
 
         Intent broadcast = new Intent(ACTION_UPDATE_RESULT);
         broadcast.putExtra(EXTRA_FETCHED, fetched);

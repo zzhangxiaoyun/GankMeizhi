@@ -34,7 +34,7 @@ public class Article extends RealmObject {
 
     private RealmList<Image> images = new RealmList<>();
 
-    private int date;
+    private int order;
 
     public String getKey() {
         return key;
@@ -84,12 +84,12 @@ public class Article extends RealmObject {
         this.images = images;
     }
 
-    public int getDate() {
-        return date;
+    public int getOrder() {
+        return order;
     }
 
-    public void setDate(int date) {
-        this.date = date;
+    public void setOrder(int order) {
+        this.order = order;
     }
 
 }

@@ -16,7 +16,6 @@
 
 package me.xingrz.gankmeizhi;
 
-import me.xingrz.gankmeizhi.db.Article;
 import me.xingrz.gankmeizhi.db.Image;
 
 public class ImageWrapper {
@@ -29,17 +28,17 @@ public class ImageWrapper {
     public final int width;
     public final int height;
 
-    private ImageWrapper(Article article, Image image) {
-        this.title = article.getTitle();
-        this.link = article.getUrl();
+    private ImageWrapper(Image image) {
+        this.title = image.getArticle().getTitle();
+        this.link = image.getArticle().getUrl();
 
         this.url = image.getUrl();
         this.width = image.getWidth();
         this.height = image.getHeight();
     }
 
-    public static ImageWrapper from(Article article, Image image) {
-        return new ImageWrapper(article, image);
+    public static ImageWrapper from(Image image) {
+        return new ImageWrapper(image);
     }
 
     @Override

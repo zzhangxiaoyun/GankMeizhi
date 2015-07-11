@@ -20,6 +20,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+/**
+ * 一个能保持比例的 ImageView
+ * TODO: 暂时只支持维持宽度适应高度
+ *
+ * @author XiNGRZ
+ */
 public class RadioImageView extends ImageView {
 
     private int originalWidth;

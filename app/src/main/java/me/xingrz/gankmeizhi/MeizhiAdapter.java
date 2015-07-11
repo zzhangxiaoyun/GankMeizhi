@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 import me.xingrz.gankmeizhi.widget.ArrayRecyclerAdapter;
 import me.xingrz.gankmeizhi.widget.RadioImageView;
 
-public class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, MeizhiAdapter.ViewHolder> {
+public abstract class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, MeizhiAdapter.ViewHolder> {
 
     private final Context context;
     private final LayoutInflater inflater;
@@ -58,6 +58,8 @@ public class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, MeizhiAdap
         return get(position).url.hashCode();
     }
 
+    protected abstract void onItemClick(View v, int position);
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.image)
@@ -69,6 +71,7 @@ public class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, MeizhiAdap
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    onItemClick(v, getAdapterPosition());
                 }
             });
         }

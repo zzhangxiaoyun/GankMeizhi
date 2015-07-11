@@ -16,7 +16,11 @@
 
 package me.xingrz.gankmeizhi.db;
 
+import java.util.List;
+
+import io.realm.Realm;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
 
 public class Image extends RealmObject {
 
@@ -24,6 +28,15 @@ public class Image extends RealmObject {
 
     private int width;
     private int height;
+
+    private Article article;
+
+    private int order;
+
+    public static List<Image> all(Realm realm) {
+        return realm.where(Image.class)
+                .findAllSorted("order", RealmResults.SORT_ORDER_DESCENDING);
+    }
 
     public String getUrl() {
         return url;
@@ -47,6 +60,22 @@ public class Image extends RealmObject {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public Article getArticle() {
+        return article;
+    }
+
+    public void setArticle(Article article) {
+        this.article = article;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
 }

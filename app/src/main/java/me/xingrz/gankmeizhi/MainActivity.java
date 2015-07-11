@@ -27,6 +27,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,8 +37,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
-import me.xingrz.gankmeizhi.db.Article;
 import me.xingrz.gankmeizhi.db.Image;
 
 public class MainActivity extends AppCompatActivity
@@ -76,7 +75,14 @@ public class MainActivity extends AppCompatActivity
         realm = Realm.getInstance(this);
         realm.addChangeListener(this);
 
-        adapter = new MeizhiAdapter(this);
+        adapter = new MeizhiAdapter(this) {
+            @Override
+            protected void onItemClick(View v, int position) {
+                Intent intent = new Intent(MainActivity.this, ViewerActivity.class);
+                intent.putExtra("index", position);
+                startActivity(intent);
+            }
+        };
 
         layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
 
@@ -98,6 +104,7 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         realm.removeChangeListener(this);
+        realm.close();
     }
 
     @Override
@@ -125,18 +132,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onChange() {
-        List<Article> articles = realm.where(Article.class)
-                .findAllSorted("date", RealmResults.SORT_ORDER_DESCENDING);
+        List<ImageWrapper> wrappers = new ArrayList<>();
 
-        List<ImageWrapper> images = new ArrayList<>();
-
-        for (Article article : articles) {
-            for (Image image : article.getImages()) {
-                images.add(ImageWrapper.from(article, image));
-            }
+        for (Image image : Image.all(realm)) {
+            wrappers.add(ImageWrapper.from(image));
         }
 
-        adapter.replaceWith(images);
+        adapter.replaceWith(wrappers);
     }
 
     private void onScrolled() {

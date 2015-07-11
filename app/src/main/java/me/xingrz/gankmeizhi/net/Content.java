@@ -51,7 +51,7 @@ public class Content {
         article.setUrl(url);
         article.setLater(later == null ? "" : later);
         article.setEarlier(earlier == null ? "" : earlier);
-        article.setDate(date());
+        article.setOrder(order());
 
         for (String url : images) {
             Point size = new Point();
@@ -63,6 +63,8 @@ public class Content {
             image.setUrl(url);
             image.setWidth(size.x);
             image.setHeight(size.y);
+            image.setArticle(article);
+            image.setOrder(order());
 
             article.getImages().add(image);
         }
@@ -74,14 +76,18 @@ public class Content {
         Log.d(TAG, String.format("updating latest record: %s->%s %s->%s %d->%d",
                 article.getUrl(), url,
                 article.getLater(), later,
-                article.getDate(), date()));
+                article.getOrder(), order()));
 
         article.setUrl(url);
         article.setLater(later == null ? "" : later);
-        article.setDate(date());
+        article.setOrder(order());
+
+        for (Image image : article.getImages()) {
+            image.setOrder(order());
+        }
     }
 
-    private int date() {
+    private int order() {
         if ("/".equals(url)) {
             return Article.DATE_LATEST;
         } else {
