@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.squareup.okhttp.OkHttpClient;
@@ -78,17 +77,17 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
         if (latest.isEmpty()) {
             Log.d(TAG, "no latest, fresh fetch");
-            fetched = freshFetch(realm, "/");
-        } else {
-            if (ACTION_FETCH_FORWARD.equals(intent.getAction())) {
-                Log.d(TAG, "latest fetch: " + latest.first().getTitle());
-                fetched = fetchForwardRecursively(realm, "/", latest.first());
-            } else if (ACTION_FETCH_BACKWARD.equals(intent.getAction())) {
-                fetched = fetchBackward(realm, latest.last().getEarlier(), 10);
-            }
+            fetched = fetch(realm, "/", 5);
+        } else if (ACTION_FETCH_FORWARD.equals(intent.getAction())) {
+            Log.d(TAG, "latest fetch: " + latest.first().getTitle());
+            fetched = fetch(realm, "/", latest.first());
+        } else if (ACTION_FETCH_BACKWARD.equals(intent.getAction())) {
+            fetched = fetch(realm, latest.last().getEarlier(), 5);
         }
 
         realm.close();
+
+        Log.d(TAG, "finished fetching, actual fetched " + fetched);
 
         Intent broadcast = new Intent(ACTION_UPDATE_RESULT);
         broadcast.putExtra(EXTRA_FETCHED, fetched);
@@ -97,99 +96,68 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         sendBroadcast(broadcast, PERMISSION_ACCESS_UPDATE_RESULT);
     }
 
-    private int freshFetch(Realm realm, String path) {
-        Content content = fetchContent(path);
-        if (content == null) {
-            return 0;
-        }
+    /**
+     * 从给定地址开始抓取，沿着每篇文章的「上一篇」向更早的爬行，直至爬到给定的文章
+     *
+     * @param realm Realm 实例
+     * @param from  开始地址（含）
+     * @param until 直到这篇文章结束，同时会更新这篇文章的相关连接信息
+     * @return 实际抓取到的数量
+     */
+    private int fetch(Realm realm, String from, Article until) {
+        Log.d(TAG, "recursively fetching " + from + " until " + until.getUrl());
 
-        realm.beginTransaction();
-
-        try {
-            realm.copyToRealm(content.persist(this));
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch image", e);
-            realm.cancelTransaction();
-            return 0;
-        }
-
-        realm.commitTransaction();
-        return 1;
-    }
-
-    private int fetchForwardRecursively(Realm realm, String path, Article until) {
-        Log.d(TAG, "recursively fetching " + path + " until " + until.getUrl());
-
-        Content content = fetchContent(path);
+        Content content = fetchContent(from);
         if (content == null) {
             return 0;
         }
 
         if (until.getKey().equals(content.key)) {
             if (!"/".equals(content.url)) {
-                realm.beginTransaction();
-                content.update(until);
-                realm.commitTransaction();
+                updateExisted(realm, until, content);
             } else {
                 Log.d(TAG, "nothing to update");
             }
             return 0;
         }
 
-        realm.beginTransaction();
-
-        try {
-            realm.copyToRealm(content.persist(this));
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch image", e);
-            realm.cancelTransaction();
+        if (!saveToDb(realm, content)) {
             return 0;
         }
-
-        realm.commitTransaction();
 
         if (content.earlier == null) {
             return 1;
         } else {
-            return 1 + fetchForwardRecursively(realm, content.earlier, until);
+            return 1 + fetch(realm, content.earlier, until);
         }
     }
 
-    private int fetchBackward(Realm realm, String since, int maxCount) {
-        Log.d(TAG, "fetching since " + since);
+    /**
+     * 从给定地址开始抓取，沿着每篇文章的「上一篇」向更早的爬行，直至满足给定的数量，或达到最旧的一篇文章
+     *
+     * @param realm Realm 实例
+     * @param from  开始地址（含）
+     * @param count 预期抓取数量
+     * @return 实际抓取到的数量
+     */
+    private int fetch(Realm realm, String from, int count) {
+        Log.d(TAG, "fetching since " + from + " remains " + count);
 
-        if (TextUtils.isEmpty(since)) {
-            Log.d(TAG, "nothing to fetch");
-            return 0;
-        }
-
-        if (maxCount < 1) {
-            return 0;
-        }
-
-        Content content = fetchContent(since);
+        Content content = fetchContent(from);
         if (content == null) {
             return 0;
         }
 
-        realm.beginTransaction();
-
-        try {
-            realm.copyToRealm(content.persist(this));
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch image", e);
-            realm.cancelTransaction();
+        if (!saveToDb(realm, content)) {
             return 0;
         }
 
-        realm.commitTransaction();
+        count--;
 
-        maxCount--;
-
-        if (content.earlier == null) {
+        if (content.earlier == null || count < 1) {
             return 1;
         } else {
-            return 1 + fetchBackward(realm, content.earlier, maxCount);
+            return 1 + fetch(realm, content.earlier, count);
         }
     }
 
@@ -211,6 +179,41 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         }
 
         return content;
+    }
+
+    /**
+     * 预解码图片并将抓到的数据保存至数据库
+     *
+     * @param realm   Realm 实例
+     * @param content 文章内容
+     * @return 是否保存成功
+     */
+    private boolean saveToDb(Realm realm, Content content) {
+        realm.beginTransaction();
+
+        try {
+            realm.copyToRealm(content.persist(this));
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to fetch image", e);
+            realm.cancelTransaction();
+            return false;
+        }
+
+        realm.commitTransaction();
+        return true;
+    }
+
+    /**
+     * 更新已有数据库记录
+     *
+     * @param realm   Realm 实例
+     * @param article 数据库记录
+     * @param content 文章内容
+     */
+    private void updateExisted(Realm realm, Article article, Content content) {
+        realm.beginTransaction();
+        content.update(article);
+        realm.commitTransaction();
     }
 
     @Override

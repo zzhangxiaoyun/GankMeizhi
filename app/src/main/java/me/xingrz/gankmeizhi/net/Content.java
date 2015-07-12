@@ -72,6 +72,14 @@ public class Content {
         return article;
     }
 
+    /**
+     * 更新已有数据库记录
+     * <p/>
+     * 因为最新一篇文章的地址是 "/"，缺少日期信息，且没有「上一篇」链接。因此当抓到比它新的文章之后，应当把它的这些
+     * 信息补充完整。
+     *
+     * @param article 数据库记录
+     */
     public void update(Article article) {
         Log.d(TAG, String.format("updating latest record: %s->%s %s->%s %d->%d",
                 article.getUrl(), url,

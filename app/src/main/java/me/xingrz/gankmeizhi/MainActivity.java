@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity
 
     private UpdateResultReceiver updateResultReceiver = new UpdateResultReceiver();
 
+    private boolean isFetching = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +123,6 @@ public class MainActivity extends AppCompatActivity
                 new IntentFilter(MeizhiFetchingService.ACTION_UPDATE_RESULT),
                 MeizhiFetchingService.PERMISSION_ACCESS_UPDATE_RESULT, null);
 
-        refresher.setRefreshing(true);
         fetchForward();
     }
 
@@ -168,6 +169,7 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "fetched " + fetched + ", triggered by " + trigger);
 
         refresher.setRefreshing(false);
+        isFetching = false;
 
         if (MeizhiFetchingService.ACTION_FETCH_FORWARD.equals(trigger)) {
             maybeFetchMoreToFill();
@@ -192,15 +194,27 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void fetchForward() {
+        if (isFetching) {
+            return;
+        }
+
         Intent intent = new Intent(this, MeizhiFetchingService.class);
         intent.setAction(MeizhiFetchingService.ACTION_FETCH_FORWARD);
         startService(intent);
+
+        isFetching = true;
     }
 
     private void fetchBackward() {
+        if (isFetching) {
+            return;
+        }
+
         Intent intent = new Intent(this, MeizhiFetchingService.class);
         intent.setAction(MeizhiFetchingService.ACTION_FETCH_BACKWARD);
         startService(intent);
+
+        isFetching = true;
     }
 
     private class UpdateResultReceiver extends BroadcastReceiver {
