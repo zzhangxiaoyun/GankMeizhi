@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -28,12 +30,14 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -64,6 +68,8 @@ public class MainActivity extends AppCompatActivity
 
     private boolean isFetching = false;
 
+    private Bundle reenterState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,9 +90,7 @@ public class MainActivity extends AppCompatActivity
         adapter = new MeizhiAdapter(this) {
             @Override
             protected void onItemClick(View v, int position) {
-                Intent intent = new Intent(MainActivity.this, ViewerActivity.class);
-                intent.putExtra("index", position);
-                startActivity(intent);
+                startViewerActivity(v, position);
             }
         };
 
@@ -99,6 +103,21 @@ public class MainActivity extends AppCompatActivity
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     MainActivity.this.onScrolled();
+                }
+            }
+        });
+
+        setExitSharedElementCallback(new SharedElementCallback() {
+            @Override
+            public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                if (reenterState != null) {
+                    int i = reenterState.getInt("index", 0);
+                    Log.d(TAG, "reenter from " + i);
+
+                    sharedElements.clear();
+                    sharedElements.put(adapter.get(i).url, layoutManager.findViewByPosition(i));
+
+                    reenterState = null;
                 }
             }
         });
@@ -215,6 +234,36 @@ public class MainActivity extends AppCompatActivity
         startService(intent);
 
         isFetching = true;
+    }
+
+    private void startViewerActivity(View itemView, int position) {
+        Intent intent = new Intent(MainActivity.this, ViewerActivity.class);
+        intent.putExtra("index", position);
+
+        ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, itemView, adapter.get(position).url);
+
+        startActivity(intent, options.toBundle());
+    }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+        super.onActivityReenter(resultCode, data);
+
+        supportPostponeEnterTransition();
+
+        reenterState = new Bundle(data.getExtras());
+
+        content.scrollToPosition(reenterState.getInt("index", 0));
+        content.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                content.getViewTreeObserver().removeOnPreDrawListener(this);
+                content.requestLayout();
+                supportStartPostponedEnterTransition();
+                return true;
+            }
+        });
     }
 
     private class UpdateResultReceiver extends BroadcastReceiver {

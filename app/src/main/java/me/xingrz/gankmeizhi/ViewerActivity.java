@@ -16,9 +16,12 @@
 
 package me.xingrz.gankmeizhi;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +30,7 @@ import android.view.View;
 import com.umeng.analytics.MobclickAgent;
 
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -53,6 +57,8 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
     @Bind(R.id.pager)
     ViewPager pager;
 
+    private int index;
+
     private Realm realm;
 
     private List<Image> images;
@@ -62,6 +68,8 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        supportPostponeEnterTransition();
 
         setContentView(R.layout.activity_viewer);
         ButterKnife.bind(this);
@@ -75,6 +83,8 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
             }
         });
 
+        index = getIntent().getIntExtra("index", 0);
+
         realm = Realm.getInstance(this);
         realm.addChangeListener(this);
 
@@ -83,7 +93,23 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
         adapter = new PagerAdapter();
 
         pager.setAdapter(adapter);
-        pager.setCurrentItem(getIntent().getIntExtra("index", 0));
+        pager.setCurrentItem(index);
+
+        // 避免图片在进行 Shared Element Transition 时盖过 Toolbar
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setSharedElementsUseOverlay(false);
+        }
+
+        setEnterSharedElementCallback(new SharedElementCallback() {
+            @Override
+            public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                Image image = images.get(pager.getCurrentItem());
+                ViewerFragment fragment = (ViewerFragment) adapter.instantiateItem(pager, pager.getCurrentItem());
+
+                sharedElements.clear();
+                sharedElements.put(image.getUrl(), fragment.getSharedElement());
+            }
+        });
     }
 
     @Override
@@ -143,6 +169,17 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
                 .start();
     }
 
+    @Override
+    public void supportFinishAfterTransition() {
+        Intent data = new Intent();
+        data.putExtra("index", pager.getCurrentItem());
+        setResult(RESULT_OK, data);
+
+        showSystemUi();
+
+        super.supportFinishAfterTransition();
+    }
+
     private class PagerAdapter extends FragmentStatePagerAdapter {
 
         public PagerAdapter() {
@@ -156,7 +193,9 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
 
         @Override
         public Fragment getItem(int position) {
-            return ViewerFragment.newFragment(images.get(position).getUrl());
+            return ViewerFragment.newFragment(
+                    images.get(position).getUrl(),
+                    position == index);
         }
 
     }

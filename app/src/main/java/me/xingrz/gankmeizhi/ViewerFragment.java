@@ -16,35 +16,57 @@
 
 package me.xingrz.gankmeizhi;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ortiz.touch.TouchImageView;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ViewerFragment extends Fragment {
+public class ViewerFragment extends Fragment implements Callback {
 
     private static final String TAG = "ViewerFragment";
 
     @Bind(R.id.image)
     TouchImageView image;
 
-    public static ViewerFragment newFragment(String url) {
+    private ViewerActivity activity;
+
+    private String url;
+    private boolean initialShown;
+
+    public static ViewerFragment newFragment(String url, boolean initialShown) {
         Bundle bundle = new Bundle();
         bundle.putString("url", url);
+        bundle.putBoolean("initial_shown", initialShown);
 
         ViewerFragment fragment = new ViewerFragment();
         fragment.setArguments(bundle);
 
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        this.activity = (ViewerActivity) activity;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        url = getArguments().getString("url");
+        initialShown = getArguments().getBoolean("initial_shown", false);
     }
 
     @Nullable
@@ -56,18 +78,41 @@ public class ViewerFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         ButterKnife.bind(this, view);
+        ViewCompat.setTransitionName(image, url);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Picasso.with(getActivity()).load(getArguments().getString("url")).into(image);
+        Picasso.with(activity)
+                .load(url)
+                .into(image, this);
+    }
+
+    @Override
+    public void onSuccess() {
+        maybeStartPostponedEnterTransition();
+    }
+
+    @Override
+    public void onError() {
+        maybeStartPostponedEnterTransition();
+    }
+
+    private void maybeStartPostponedEnterTransition() {
+        if (initialShown) {
+            activity.supportStartPostponedEnterTransition();
+        }
     }
 
     @OnClick(R.id.image)
     @SuppressWarnings("unused")
     void toggleToolbar() {
-        ((ViewerActivity) getActivity()).toggleToolbar();
+        activity.toggleToolbar();
+    }
+
+    View getSharedElement() {
+        return image;
     }
 
 }

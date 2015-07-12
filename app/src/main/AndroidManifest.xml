@@ -54,7 +54,7 @@
 
         <activity
             android:name=".ViewerActivity"
-            android:theme="@style/AppTheme.Viewer" />
+            android:theme="@style/ViewerTheme" />
 
         <service android:name=".MeizhiFetchingService" />
 

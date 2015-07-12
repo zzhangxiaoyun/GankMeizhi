@@ -18,6 +18,7 @@ package me.xingrz.gankmeizhi;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,6 +52,7 @@ public abstract class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, M
         ImageWrapper image = get(position);
         holder.imageView.setOriginalSize(image.width, image.height);
         Picasso.with(context).load(image.url).into(holder.imageView);
+        ViewCompat.setTransitionName(holder.imageView, image.url);
     }
 
     @Override
