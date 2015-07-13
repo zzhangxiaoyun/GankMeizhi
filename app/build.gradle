@@ -33,7 +33,7 @@ android {
     }
 
     lintOptions {
-        disable 'InvalidPackage'
+        disable 'InvalidPackage', 'IconMissingDensityFolder'
     }
 
     packagingOptions {
@@ -63,9 +63,6 @@ android {
         }
         FIR {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "FIR"]
-        }
-        Wandoujia {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Wandoujia"]
         }
     }
 }

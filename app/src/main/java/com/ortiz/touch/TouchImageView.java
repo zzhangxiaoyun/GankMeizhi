@@ -31,6 +31,7 @@
 
 package com.ortiz.touch;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -852,6 +853,7 @@ public class TouchImageView extends ImageView {
         private PointF last = new PointF();
 
         @Override
+        @SuppressLint("ClickableViewAccessibility")
         public boolean onTouch(View v, MotionEvent event) {
             mScaleDetector.onTouchEvent(event);
             mGestureDetector.onTouchEvent(event);
