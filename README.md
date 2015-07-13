@@ -8,11 +8,11 @@
 本项目包含以下知识点：
 
 - [Butter Knife](http://jakewharton.github.io/butterknife/)：通过注解绑定 View
-- [Realm](http://realm.io/) 数据库
+- [Realm](https://realm.io) 数据库
 - `RecyclerView` 及 `StaggeredGridLayoutManager` 瀑布流布局
 - `IntentService` 实现的后台网络请求
 - Android Design Support Library 中的 `CoordinatorLayout`
-- 使用 Jsoup 解析 HTML
+- 使用 [Jsoup](http://jsoup.org) 解析 HTML
 
 ## 使用要求
 
@@ -20,7 +20,7 @@
 
 ## 开发要求
 
-- Gradle 2.4 (或使用内置的 `./gradlew`)
+- Gradle 2.5 (或使用内置的 `./gradlew`)
 - Android Studio 1.3 RC1 以上 (canary channel)
 - Android 5.1.X (API 22) SDK Platform
 - Android Build-tools 23.0.0 rc3
