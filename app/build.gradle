@@ -26,8 +26,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 22
 
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
 
         manifestPlaceholders = [UMENG_CHANNEL_VALUE: "GitHub"]
     }
@@ -68,9 +68,9 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:design:22.2.0'
-    compile 'com.android.support:cardview-v7:22.2.0'
-    compile 'com.android.support:recyclerview-v7:22.2.0'
+    compile 'com.android.support:design:22.2.1'
+    compile 'com.android.support:cardview-v7:22.2.1'
+    compile 'com.android.support:recyclerview-v7:22.2.1'
 
     compile 'com.jakewharton:butterknife:7.0.1'
 
