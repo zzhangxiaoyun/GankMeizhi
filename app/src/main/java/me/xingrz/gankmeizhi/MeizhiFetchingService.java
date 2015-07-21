@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.squareup.okhttp.OkHttpClient;
@@ -105,6 +106,10 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
      * @return 实际抓取到的数量
      */
     private int fetch(Realm realm, String from, Article until) {
+        if (TextUtils.isEmpty(from)) {
+            return 0;
+        }
+
         Log.d(TAG, "recursively fetching " + from + " until " + until.getUrl());
 
         Content content = fetchContent(from);
@@ -141,6 +146,10 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
      * @return 实际抓取到的数量
      */
     private int fetch(Realm realm, String from, int count) {
+        if (TextUtils.isEmpty(from)) {
+            return 0;
+        }
+
         Log.d(TAG, "fetching since " + from + " remains " + count);
 
         Content content = fetchContent(from);

@@ -79,8 +79,8 @@ public class ContentParser {
         Log.d(TAG, "url: " + article.url);
 
         Elements sibling = content.select("> .row .six.columns p");
-        if (sibling.size() != 2) {
-            Log.e(TAG, "sibling count not 2");
+        if (sibling.size() != 4) {
+            Log.e(TAG, "sibling count not 4");
             return null;
         }
 
@@ -96,13 +96,25 @@ public class ContentParser {
             Log.d(TAG, "earlier: " + article.earlier);
         }
 
-        for (Element image : content.select("> .outlink > * > img")) {
-            String src = image.attr("src");
-            article.images.add(src);
-            Log.d(TAG, "image: " + src);
+        for (Element paragraph : content.select("> .outlink > *")) {
+            if (isParagraphHeader(paragraph)) {
+                break;
+            }
+
+            Element image = paragraph.select("> img").first();
+            if (image != null) {
+                String src = image.attr("src");
+                article.images.add(src);
+                Log.d(TAG, "image: " + src);
+            }
         }
 
         return article;
+    }
+
+    private static boolean isParagraphHeader(Element paragraph) {
+        return paragraph.tagName().toLowerCase().equals("h1") && paragraph.hasText() &&
+                (paragraph.text().equals("iOS") || paragraph.text().equals("Android"));
     }
 
 }
