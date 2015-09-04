@@ -3,16 +3,16 @@
 
 只是一个业余的 Android 项目而已。
 
-![截图](screenshots/1.png)
+<img src="https://github.com/xingrz/GankMeizhi/raw/master/screenshots/1.jpg" width="340" />
 
 本项目包含以下知识点：
 
 - [Butter Knife](http://jakewharton.github.io/butterknife/)：通过注解绑定 View
-- [Realm](https://realm.io) 数据库
+- [Picasso](https://square.github.io/picasso/) 图片加载
+- [Realm](https://realm.io) 数据库与 [Retrofit](https://square.github.io/retrofit/) RESTful API 框架的配合
 - `RecyclerView` 及 `StaggeredGridLayoutManager` 瀑布流布局
 - `IntentService` 实现的后台网络请求
 - Android Design Support Library 中的 `CoordinatorLayout`
-- 使用 [Jsoup](http://jsoup.org) 解析 HTML
 
 ## 使用要求
 
@@ -21,10 +21,10 @@
 ## 开发要求
 
 - Gradle 2.5 (或使用内置的 `./gradlew`)
-- Android Studio 1.3 RC1 以上 (canary channel)
-- Android 5.1.X (API 22) SDK Platform
-- Android Build-tools 23.0.0 rc3
-- Android Support Repository
+- Android Studio 1.4 Beta 以上 (canary channel)
+- Android 6.0 (API 23) SDK Platform
+- Android Support Library 23.0.0
+- Android Build-tools 23.0.0
 
 ## 致谢
 
