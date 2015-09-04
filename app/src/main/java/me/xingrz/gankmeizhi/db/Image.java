@@ -16,26 +16,55 @@
 
 package me.xingrz.gankmeizhi.db;
 
-import java.util.List;
+import android.graphics.Point;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.io.IOException;
+import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.RealmResults;
+import io.realm.annotations.PrimaryKey;
+import me.xingrz.gankmeizhi.net.ImageFetcher;
 
 public class Image extends RealmObject {
+
+    @PrimaryKey
+    @SerializedName("objectId")
+    private String id;
 
     private String url;
 
     private int width;
     private int height;
 
-    private Article article;
+    private Date publishedAt;
 
-    private int order;
-
-    public static List<Image> all(Realm realm) {
+    public static RealmResults<Image> all(Realm realm) {
         return realm.where(Image.class)
-                .findAllSorted("order", RealmResults.SORT_ORDER_DESCENDING);
+                .findAllSorted("publishedAt", RealmResults.SORT_ORDER_DESCENDING);
+    }
+
+    public static Image persist(Image image, ImageFetcher imageFetcher) throws IOException {
+        Point size = new Point();
+
+        // TODO: 这样首次抓取的时候要多抓取一次用于测量尺寸，会耗费多一次。以后再优化
+        imageFetcher.prefetchImage(image.getUrl(), size);
+
+        image.setWidth(size.x);
+        image.setHeight(size.y);
+
+        return image;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getUrl() {
@@ -62,20 +91,12 @@ public class Image extends RealmObject {
         this.height = height;
     }
 
-    public Article getArticle() {
-        return article;
+    public Date getPublishedAt() {
+        return publishedAt;
     }
 
-    public void setArticle(Article article) {
-        this.article = article;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
+    public void setPublishedAt(Date publishedAt) {
+        this.publishedAt = publishedAt;
     }
 
 }

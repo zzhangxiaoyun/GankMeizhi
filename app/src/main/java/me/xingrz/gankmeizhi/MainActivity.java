@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity
         refresher.setColorSchemeResources(R.color.primary);
         refresher.setOnRefreshListener(this);
 
-        realm = Realm.getInstance(this);
+        realm = Realm.getDefaultInstance();
         realm.addChangeListener(this);
 
         adapter = new MeizhiAdapter(this) {
@@ -221,6 +221,13 @@ public class MainActivity extends AppCompatActivity
         intent.setAction(MeizhiFetchingService.ACTION_FETCH_FORWARD);
         startService(intent);
 
+        refresher.post(new Runnable() {
+            @Override
+            public void run() {
+                refresher.setRefreshing(true);
+            }
+        });
+
         isFetching = true;
     }
 
@@ -232,6 +239,13 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MeizhiFetchingService.class);
         intent.setAction(MeizhiFetchingService.ACTION_FETCH_BACKWARD);
         startService(intent);
+
+        refresher.post(new Runnable() {
+            @Override
+            public void run() {
+                refresher.setRefreshing(true);
+            }
+        });
 
         isFetching = true;
     }
@@ -254,12 +268,14 @@ public class MainActivity extends AppCompatActivity
 
         reenterState = new Bundle(data.getExtras());
 
-        content.scrollToPosition(reenterState.getInt("index", 0));
+        final int index = reenterState.getInt("index", 0);
+
         content.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 content.getViewTreeObserver().removeOnPreDrawListener(this);
                 content.requestLayout();
+                content.scrollToPosition(index);
                 supportStartPostponedEnterTransition();
                 return true;
             }

@@ -29,7 +29,7 @@ import com.squareup.picasso.Picasso;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.xingrz.gankmeizhi.widget.ArrayRecyclerAdapter;
-import me.xingrz.gankmeizhi.widget.RadioImageView;
+import me.xingrz.gankmeizhi.widget.RatioImageView;
 
 public abstract class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, MeizhiAdapter.ViewHolder> {
 
@@ -64,8 +64,8 @@ public abstract class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, M
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.image)
-        public RadioImageView imageView;
+        @Bind(R.id.picture)
+        public RatioImageView imageView;
 
         public ViewHolder(@LayoutRes int resource, ViewGroup parent) {
             super(inflater.inflate(resource, parent, false));

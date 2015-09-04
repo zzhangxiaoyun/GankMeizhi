@@ -17,17 +17,20 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "23.0.0 rc3"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.0"
 
     defaultConfig {
         applicationId "me.xingrz.gankmeizhi"
 
         minSdkVersion 19
+
+        //因为我的一加还没 6.0 啧
+        //noinspection OldTargetApi
         targetSdkVersion 22
 
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
 
         manifestPlaceholders = [UMENG_CHANNEL_VALUE: "GitHub"]
     }
@@ -68,18 +71,16 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:design:22.2.1'
-    compile 'com.android.support:cardview-v7:22.2.1'
-    compile 'com.android.support:recyclerview-v7:22.2.1'
+    compile 'com.android.support:design:23.0.0'
+    compile 'com.android.support:recyclerview-v7:23.0.0'
 
     compile 'com.jakewharton:butterknife:7.0.1'
 
-    compile 'com.squareup.okhttp:okhttp:2.4.0'
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
 
-    compile 'org.jsoup:jsoup:1.8.2'
-
-    compile 'io.realm:realm-android:0.81.1'
+    compile 'io.realm:realm-android:0.82.1'
 
     compile 'com.umeng.analytics:analytics:latest.integration'
 }

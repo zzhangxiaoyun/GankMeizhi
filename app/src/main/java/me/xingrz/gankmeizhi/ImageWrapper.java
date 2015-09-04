@@ -20,18 +20,12 @@ import me.xingrz.gankmeizhi.db.Image;
 
 public class ImageWrapper {
 
-    public final String title;
-    public final String link;
-
     public final String url;
 
     public final int width;
     public final int height;
 
     private ImageWrapper(Image image) {
-        this.title = image.getArticle().getTitle();
-        this.link = image.getArticle().getUrl();
-
         this.url = image.getUrl();
         this.width = image.getWidth();
         this.height = image.getHeight();

@@ -21,8 +21,8 @@
     android:layout_margin="2dp"
     android:foreground="?selectableItemBackground">
 
-    <me.xingrz.gankmeizhi.widget.RadioImageView
-        android:id="@+id/image"
+    <me.xingrz.gankmeizhi.widget.RatioImageView
+        android:id="@+id/picture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitCenter"

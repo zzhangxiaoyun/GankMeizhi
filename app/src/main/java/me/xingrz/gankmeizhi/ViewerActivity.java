@@ -85,7 +85,7 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
 
         index = getIntent().getIntExtra("index", 0);
 
-        realm = Realm.getInstance(this);
+        realm = Realm.getDefaultInstance();
         realm.addChangeListener(this);
 
         images = Image.all(realm);

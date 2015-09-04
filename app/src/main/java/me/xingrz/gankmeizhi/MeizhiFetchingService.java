@@ -20,23 +20,29 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmObject;
 import io.realm.RealmResults;
-import me.xingrz.gankmeizhi.db.Article;
-import me.xingrz.gankmeizhi.net.ArticleRequestFactory;
-import me.xingrz.gankmeizhi.net.Content;
-import me.xingrz.gankmeizhi.net.ContentParser;
+import me.xingrz.gankmeizhi.db.Image;
+import me.xingrz.gankmeizhi.net.DateUtils;
+import me.xingrz.gankmeizhi.net.GankApi;
 import me.xingrz.gankmeizhi.net.ImageFetcher;
+import retrofit.RestAdapter;
+import retrofit.converter.GsonConverter;
 
 /**
  * 数据抓取服务
@@ -61,7 +67,29 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
     private static final String TAG = "MeizhiFetchingService";
 
+    private static final int COUNT_PER_FETCH = 10;
+
     private final OkHttpClient client = new OkHttpClient();
+
+    private final GankApi gankApi = new RestAdapter.Builder()
+            .setEndpoint("https://gank.avosapps.com/api")
+            .setLogLevel(BuildConfig.DEBUG ? RestAdapter.LogLevel.FULL : RestAdapter.LogLevel.BASIC)
+            .setConverter(new GsonConverter(new GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                    .setExclusionStrategies(new ExclusionStrategy() {
+                        @Override
+                        public boolean shouldSkipField(FieldAttributes f) {
+                            return f.getDeclaringClass().equals(RealmObject.class);
+                        }
+
+                        @Override
+                        public boolean shouldSkipClass(Class<?> clazz) {
+                            return false;
+                        }
+                    })
+                    .create()))
+            .build()
+            .create(GankApi.class);
 
     public MeizhiFetchingService() {
         super(TAG);
@@ -69,21 +97,21 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Realm realm = Realm.getInstance(this);
+        Realm realm = Realm.getDefaultInstance();
 
-        RealmResults<Article> latest = realm.where(Article.class)
-                .findAllSorted("order", RealmResults.SORT_ORDER_DESCENDING);
+        RealmResults<Image> latest = Image.all(realm);
 
         int fetched = 0;
 
         if (latest.isEmpty()) {
             Log.d(TAG, "no latest, fresh fetch");
-            fetched = fetch(realm, "/", 5);
+            fetched = fetchLatest(realm);
         } else if (ACTION_FETCH_FORWARD.equals(intent.getAction())) {
-            Log.d(TAG, "latest fetch: " + latest.first().getTitle());
-            fetched = fetch(realm, "/", latest.first());
+            Log.d(TAG, "latest fetch: " + latest.first().getUrl());
+            fetched = fetchSince(realm, latest.first().getPublishedAt());
         } else if (ACTION_FETCH_BACKWARD.equals(intent.getAction())) {
-            fetched = fetch(realm, latest.last().getEarlier(), 5);
+            Log.d(TAG, "earliest fetch: " + latest.last().getUrl());
+            fetched = fetchBefore(realm, latest.last().getPublishedAt());
         }
 
         realm.close();
@@ -97,111 +125,98 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         sendBroadcast(broadcast, PERMISSION_ACCESS_UPDATE_RESULT);
     }
 
-    /**
-     * 从给定地址开始抓取，沿着每篇文章的「上一篇」向更早的爬行，直至爬到给定的文章
-     *
-     * @param realm Realm 实例
-     * @param from  开始地址（含）
-     * @param until 直到这篇文章结束，同时会更新这篇文章的相关连接信息
-     * @return 实际抓取到的数量
-     */
-    private int fetch(Realm realm, String from, Article until) {
-        if (TextUtils.isEmpty(from)) {
+    private int fetchLatest(Realm realm) {
+        GankApi.Result<List<Image>> result = gankApi.latest(COUNT_PER_FETCH);
+        if (result.error) {
             return 0;
         }
 
-        Log.d(TAG, "recursively fetching " + from + " until " + until.getUrl());
-
-        Content content = fetchContent(from);
-        if (content == null) {
-            return 0;
-        }
-
-        if (until.getKey().equals(content.key)) {
-            if (!"/".equals(content.url)) {
-                updateExisted(realm, until, content);
-            } else {
-                Log.d(TAG, "nothing to update");
+        for (int i = 0; i < result.results.size(); i++) {
+            if (!saveToDb(realm, result.results.get(i))) {
+                return i;
             }
-            return 0;
         }
 
-        if (!saveToDb(realm, content)) {
-            return 0;
-        }
-
-        if (content.earlier == null) {
-            return 1;
-        } else {
-            return 1 + fetch(realm, content.earlier, until);
-        }
+        return result.results.size();
     }
 
-    /**
-     * 从给定地址开始抓取，沿着每篇文章的「上一篇」向更早的爬行，直至满足给定的数量，或达到最旧的一篇文章
-     *
-     * @param realm Realm 实例
-     * @param from  开始地址（含）
-     * @param count 预期抓取数量
-     * @return 实际抓取到的数量
-     */
-    private int fetch(Realm realm, String from, int count) {
-        if (TextUtils.isEmpty(from)) {
+    private int fetchSince(Realm realm, Date sinceDate) {
+        String[] since = DateUtils.format(sinceDate);
+
+        GankApi.Result<List<String>> dates = gankApi.since(
+                COUNT_PER_FETCH,
+                since[0], since[1], since[2]);
+
+        if (dates.error) {
             return 0;
         }
 
-        Log.d(TAG, "fetching since " + from + " remains " + count);
-
-        Content content = fetchContent(from);
-        if (content == null) {
-            return 0;
-        }
-
-        if (!saveToDb(realm, content)) {
-            return 0;
-        }
-
-        count--;
-
-        if (content.earlier == null || count < 1) {
-            return 1;
-        } else {
-            return 1 + fetch(realm, content.earlier, count);
-        }
+        return fetch(realm, dates.results, since);
     }
 
-    @Nullable
-    private Content fetchContent(String path) {
-        String html;
+    private int fetchBefore(Realm realm, Date beforeDate) {
+        String[] before = DateUtils.format(beforeDate);
 
-        try {
-            html = client.newCall(ArticleRequestFactory.make(path)).execute().body().string();
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch " + path, e);
-            return null;
+        GankApi.Result<List<String>> dates = gankApi.before(
+                COUNT_PER_FETCH,
+                before[0], before[1], before[2]);
+
+        if (dates.error) {
+            return 0;
         }
 
-        Content content = ContentParser.parse(html);
-        if (content == null) {
-            Log.e(TAG, "cannot parse content " + path);
-            return null;
+        return fetch(realm, dates.results, before);
+    }
+
+    private int fetch(Realm realm, List<String> dates, String[] boundary) {
+        Log.d(TAG, "fetching: " + dates.toString());
+
+        int fetched = 0;
+
+        for (String dateString : dates) {
+            String[] date = DateUtils.format(dateString);
+
+            if (date == null) {
+                return fetched;
+            }
+
+            if (Arrays.equals(date, boundary)) {
+                continue;
+            }
+
+            GankApi.Result<GankApi.Article> article = gankApi.get(date[0], date[1], date[2]);
+            if (article.error) {
+                return fetched;
+            }
+
+            if (article.results == null || article.results.images == null) {
+                continue;
+            }
+
+            for (Image image : article.results.images) {
+                if (!saveToDb(realm, image)) {
+                    return fetched;
+                }
+
+                fetched++;
+            }
         }
 
-        return content;
+        return fetched;
     }
 
     /**
      * 预解码图片并将抓到的数据保存至数据库
      *
-     * @param realm   Realm 实例
-     * @param content 文章内容
+     * @param realm Realm 实例
+     * @param image 图片
      * @return 是否保存成功
      */
-    private boolean saveToDb(Realm realm, Content content) {
+    private boolean saveToDb(Realm realm, Image image) {
         realm.beginTransaction();
 
         try {
-            realm.copyToRealm(content.persist(this));
+            realm.copyToRealm(Image.persist(image, this));
         } catch (IOException e) {
             Log.e(TAG, "Failed to fetch image", e);
             realm.cancelTransaction();
@@ -210,19 +225,6 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
         realm.commitTransaction();
         return true;
-    }
-
-    /**
-     * 更新已有数据库记录
-     *
-     * @param realm   Realm 实例
-     * @param article 数据库记录
-     * @param content 文章内容
-     */
-    private void updateExisted(Realm realm, Article article, Content content) {
-        realm.beginTransaction();
-        content.update(article);
-        realm.commitTransaction();
     }
 
     @Override

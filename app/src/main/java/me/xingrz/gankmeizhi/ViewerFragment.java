@@ -16,7 +16,6 @@
 
 package me.xingrz.gankmeizhi;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -37,7 +36,7 @@ public class ViewerFragment extends Fragment implements Callback {
 
     private static final String TAG = "ViewerFragment";
 
-    @Bind(R.id.image)
+    @Bind(R.id.picture)
     TouchImageView image;
 
     private ViewerActivity activity;
@@ -57,14 +56,11 @@ public class ViewerFragment extends Fragment implements Callback {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.activity = (ViewerActivity) activity;
-    }
-
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        activity = (ViewerActivity) getActivity();
+
         url = getArguments().getString("url");
         initialShown = getArguments().getBoolean("initial_shown", false);
     }
@@ -105,7 +101,7 @@ public class ViewerFragment extends Fragment implements Callback {
         }
     }
 
-    @OnClick(R.id.image)
+    @OnClick(R.id.picture)
     @SuppressWarnings("unused")
     void toggleToolbar() {
         activity.toggleToolbar();

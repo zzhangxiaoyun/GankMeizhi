@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package me.xingrz.gankmeizhi.net;
+package me.xingrz.gankmeizhi;
 
-import com.squareup.okhttp.Request;
+import android.app.Application;
 
-public class ArticleRequestFactory {
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
-    public static final String URL = "http://gank.io";
+public class MeizhiApplication extends Application {
 
-    public static Request make(String path) {
-        return new Request.Builder().url(URL + path).build();
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        Realm.setDefaultConfiguration(new RealmConfiguration.Builder(this)
+                .schemaVersion(2)
+                .deleteRealmIfMigrationNeeded()
+                .build());
     }
 
 }

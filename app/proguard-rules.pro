@@ -25,6 +25,14 @@
 -dontwarn okio.**
 
 
+# Retrofit
+
+-dontwarn retrofit.**
+-keep class retrofit.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+
+
 # Support Design Library
 
 -keep class * extends android.support.design.widget.CoordinatorLayout$Behavior {
@@ -49,3 +57,6 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+-dontwarn com.umeng.**
+-dontwarn org.apache.http.**
