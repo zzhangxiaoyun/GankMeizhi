@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -184,7 +185,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onFetched(int fetched, String trigger) {
+    private void onFetched(int fetched, @NonNull String trigger) {
         Log.d(TAG, "fetched " + fetched + ", triggered by " + trigger);
 
         refresher.setRefreshing(false);

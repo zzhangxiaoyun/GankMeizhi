@@ -29,8 +29,8 @@ android {
         //noinspection OldTargetApi
         targetSdkVersion 22
 
-        versionCode 3
-        versionName "1.2"
+        versionCode 4
+        versionName "1.2.1"
 
         manifestPlaceholders = [UMENG_CHANNEL_VALUE: "GitHub"]
     }
@@ -71,8 +71,8 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:design:23.0.0'
-    compile 'com.android.support:recyclerview-v7:23.0.0'
+    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:recyclerview-v7:23.0.1'
 
     compile 'com.jakewharton:butterknife:7.0.1'
 
