@@ -20,8 +20,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -33,6 +35,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
@@ -45,11 +48,15 @@ import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import me.xingrz.gankmeizhi.db.Image;
+import me.xingrz.gankmeizhi.util.ColorMixer;
 
 public class MainActivity extends AppCompatActivity
         implements SwipeRefreshLayout.OnRefreshListener, RealmChangeListener {
 
     private static final String TAG = "MainActivity";
+
+    @Bind(R.id.appbar)
+    AppBarLayout appbar;
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -81,6 +88,22 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
+
+        final int colorPrimaryDark = getResources().getColor(R.color.primary_dark);
+
+        final SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        tintManager.setStatusBarTintEnabled(true);
+        tintManager.setStatusBarTintColor(colorPrimaryDark);
+        tintManager.setStatusBarAlpha(1.0f);
+
+        appbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+                tintManager.setStatusBarTintColor(ColorMixer.mix(
+                        colorPrimaryDark, Color.BLACK,
+                        (float) -i / (float) appBarLayout.getHeight()));
+            }
+        });
 
         refresher.setColorSchemeResources(R.color.primary);
         refresher.setOnRefreshListener(this);
