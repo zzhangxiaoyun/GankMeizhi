@@ -24,7 +24,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.umeng.analytics.MobclickAgent;
@@ -51,9 +50,6 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_FULLSCREEN;
 
-    @Bind(R.id.toolbar)
-    Toolbar toolbar;
-
     @Bind(R.id.pager)
     ViewPager pager;
 
@@ -65,6 +61,8 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
 
     private PagerAdapter adapter;
 
+    private boolean isSystemUiShown = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,15 +71,6 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
 
         setContentView(R.layout.activity_viewer);
         ButterKnife.bind(this);
-
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                supportFinishAfterTransition();
-            }
-        });
 
         index = getIntent().getIntExtra("index", 0);
 
@@ -146,7 +135,7 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
     }
 
     public void toggleToolbar() {
-        if (toolbar.getTranslationY() == 0) {
+        if (isSystemUiShown) {
             hideSystemUi();
         } else {
             showSystemUi();
@@ -155,18 +144,12 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
 
     private void showSystemUi() {
         pager.setSystemUiVisibility(SYSTEM_UI_BASE_VISIBILITY);
-        toolbar.animate()
-                .translationY(0)
-                .setDuration(400)
-                .start();
+        isSystemUiShown = true;
     }
 
     private void hideSystemUi() {
         pager.setSystemUiVisibility(SYSTEM_UI_BASE_VISIBILITY | SYSTEM_UI_IMMERSIVE);
-        toolbar.animate()
-                .translationY(-toolbar.getHeight())
-                .setDuration(400)
-                .start();
+        isSystemUiShown = false;
     }
 
     @Override
