@@ -142,8 +142,6 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(updateResultReceiver,
                 new IntentFilter(MeizhiFetchingService.ACTION_UPDATE_RESULT),
                 MeizhiFetchingService.PERMISSION_ACCESS_UPDATE_RESULT, null);
-
-        fetchForward();
     }
 
     @Override
