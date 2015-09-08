@@ -24,6 +24,7 @@ import android.util.Log;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -41,8 +42,8 @@ import me.xingrz.gankmeizhi.db.Image;
 import me.xingrz.gankmeizhi.net.DateUtils;
 import me.xingrz.gankmeizhi.net.GankApi;
 import me.xingrz.gankmeizhi.net.ImageFetcher;
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
 
 /**
  * 数据抓取服务
@@ -71,25 +72,28 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
     private final OkHttpClient client = new OkHttpClient();
 
-    private final GankApi gankApi = new RestAdapter.Builder()
-            .setEndpoint("https://gank.avosapps.com/api")
-            .setLogLevel(BuildConfig.DEBUG ? RestAdapter.LogLevel.FULL : RestAdapter.LogLevel.BASIC)
-            .setConverter(new GsonConverter(new GsonBuilder()
-                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                    .setExclusionStrategies(new ExclusionStrategy() {
-                        @Override
-                        public boolean shouldSkipField(FieldAttributes f) {
-                            return f.getDeclaringClass().equals(RealmObject.class);
-                        }
+    private final Gson gson = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .setExclusionStrategies(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes f) {
+                    return f.getDeclaringClass().equals(RealmObject.class);
+                }
 
-                        @Override
-                        public boolean shouldSkipClass(Class<?> clazz) {
-                            return false;
-                        }
-                    })
-                    .create()))
-            .build()
-            .create(GankApi.class);
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return false;
+                }
+            })
+            .create();
+
+    private final Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl("https://gank.avosapps.com/api/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build();
+
+    private final GankApi gankApi = retrofit.create(GankApi.class);
 
     public MeizhiFetchingService() {
         super(TAG);
@@ -103,15 +107,19 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
         int fetched = 0;
 
-        if (latest.isEmpty()) {
-            Log.d(TAG, "no latest, fresh fetch");
-            fetched = fetchLatest(realm);
-        } else if (ACTION_FETCH_FORWARD.equals(intent.getAction())) {
-            Log.d(TAG, "latest fetch: " + latest.first().getUrl());
-            fetched = fetchSince(realm, latest.first().getPublishedAt());
-        } else if (ACTION_FETCH_BACKWARD.equals(intent.getAction())) {
-            Log.d(TAG, "earliest fetch: " + latest.last().getUrl());
-            fetched = fetchBefore(realm, latest.last().getPublishedAt());
+        try {
+            if (latest.isEmpty()) {
+                Log.d(TAG, "no latest, fresh fetch");
+                fetched = fetchLatest(realm);
+            } else if (ACTION_FETCH_FORWARD.equals(intent.getAction())) {
+                Log.d(TAG, "latest fetch: " + latest.first().getUrl());
+                fetched = fetchSince(realm, latest.first().getPublishedAt());
+            } else if (ACTION_FETCH_BACKWARD.equals(intent.getAction())) {
+                Log.d(TAG, "earliest fetch: " + latest.last().getUrl());
+                fetched = fetchBefore(realm, latest.last().getPublishedAt());
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "failed to issue network request", e);
         }
 
         realm.close();
@@ -125,8 +133,9 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         sendBroadcast(broadcast, PERMISSION_ACCESS_UPDATE_RESULT);
     }
 
-    private int fetchLatest(Realm realm) {
-        GankApi.Result<List<Image>> result = gankApi.latest(COUNT_PER_FETCH);
+    private int fetchLatest(Realm realm) throws IOException {
+        GankApi.Result<List<Image>> result = gankApi.latest(COUNT_PER_FETCH).execute().body();
+
         if (result.error) {
             return 0;
         }
@@ -140,12 +149,11 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         return result.results.size();
     }
 
-    private int fetchSince(Realm realm, Date sinceDate) {
+    private int fetchSince(Realm realm, Date sinceDate) throws IOException {
         String[] since = DateUtils.format(sinceDate);
 
         GankApi.Result<List<String>> dates = gankApi.since(
-                COUNT_PER_FETCH,
-                since[0], since[1], since[2]);
+                COUNT_PER_FETCH, since[0], since[1], since[2]).execute().body();
 
         if (dates.error) {
             return 0;
@@ -154,12 +162,11 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         return fetch(realm, dates.results, since);
     }
 
-    private int fetchBefore(Realm realm, Date beforeDate) {
+    private int fetchBefore(Realm realm, Date beforeDate) throws IOException {
         String[] before = DateUtils.format(beforeDate);
 
         GankApi.Result<List<String>> dates = gankApi.before(
-                COUNT_PER_FETCH,
-                before[0], before[1], before[2]);
+                COUNT_PER_FETCH, before[0], before[1], before[2]).execute().body();
 
         if (dates.error) {
             return 0;
@@ -168,7 +175,7 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         return fetch(realm, dates.results, before);
     }
 
-    private int fetch(Realm realm, List<String> dates, String[] boundary) {
+    private int fetch(Realm realm, List<String> dates, String[] boundary) throws IOException {
         Log.d(TAG, "fetching: " + dates.toString());
 
         int fetched = 0;
@@ -184,7 +191,9 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
                 continue;
             }
 
-            GankApi.Result<GankApi.Article> article = gankApi.get(date[0], date[1], date[2]);
+            GankApi.Result<GankApi.Article> article = gankApi.get(
+                    date[0], date[1], date[2]).execute().body();
+
             if (article.error) {
                 return fetched;
             }

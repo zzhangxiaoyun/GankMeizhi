@@ -146,7 +146,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        onChange();
+        if (populate() == 0) {
+            fetchForward();
+        }
     }
 
     @Override
@@ -182,6 +184,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onChange() {
+        populate();
+    }
+
+    private int populate() {
         List<ImageWrapper> wrappers = new ArrayList<>();
 
         for (Image image : Image.all(realm)) {
@@ -189,6 +195,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         adapter.replaceWith(wrappers);
+
+        return wrappers.size();
     }
 
     private void onScrolled() {
