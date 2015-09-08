@@ -25,12 +25,10 @@ android {
 
         minSdkVersion 19
 
-        //因为我的一加还没 6.0 啧
-        //noinspection OldTargetApi
-        targetSdkVersion 22
+        targetSdkVersion 23
 
-        versionCode 4
-        versionName "1.2.1"
+        versionCode 5
+        versionName "1.3"
 
         manifestPlaceholders = [UMENG_CHANNEL_VALUE: "GitHub"]
     }
@@ -54,8 +52,13 @@ android {
         GitHub {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "GitHub"]
         }
+
         FIR {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "FIR"]
+        }
+
+        Google {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Google"]
         }
     }
 
