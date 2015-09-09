@@ -72,18 +72,6 @@ android {
         meizu {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Meizu"]
         }
-
-        baidu {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Baidu"]
-        }
-
-        nione {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "91"]
-        }
-
-        hiapk {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "HiApk"]
-        }
     }
 
     applicationVariants.all { variant ->
