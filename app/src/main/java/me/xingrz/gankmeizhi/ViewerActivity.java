@@ -37,8 +37,9 @@ import butterknife.OnPageChange;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import me.xingrz.gankmeizhi.db.Image;
+import me.xingrz.gankmeizhi.widget.PullBackLayout;
 
-public class ViewerActivity extends AppCompatActivity implements RealmChangeListener {
+public class ViewerActivity extends AppCompatActivity implements RealmChangeListener, PullBackLayout.Callback {
 
     private static final String TAG = "ViewerActivity";
 
@@ -49,6 +50,9 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
     private static final int SYSTEM_UI_IMMERSIVE = View.SYSTEM_UI_FLAG_IMMERSIVE
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_FULLSCREEN;
+
+    @Bind(R.id.puller)
+    PullBackLayout puller;
 
     @Bind(R.id.pager)
     ViewPager pager;
@@ -79,6 +83,8 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
 
         images = Image.all(realm);
 
+        puller.setCallback(this);
+
         adapter = new PagerAdapter();
 
         pager.setAdapter(adapter);
@@ -93,10 +99,8 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
             @Override
             public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
                 Image image = images.get(pager.getCurrentItem());
-                ViewerFragment fragment = (ViewerFragment) adapter.instantiateItem(pager, pager.getCurrentItem());
-
                 sharedElements.clear();
-                sharedElements.put(image.getUrl(), fragment.getSharedElement());
+                sharedElements.put(image.getUrl(), adapter.getCurrent().getSharedElement());
             }
         });
     }
@@ -163,6 +167,21 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
         super.supportFinishAfterTransition();
     }
 
+    @Override
+    public void onPull(float progress) {
+        getWindow().getDecorView().getBackground().setAlpha(0xff - (int) Math.floor(0xff * progress));
+    }
+
+    @Override
+    public void onPullDown() {
+        supportFinishAfterTransition();
+    }
+
+    @Override
+    public boolean canPullDown() {
+        return !adapter.getCurrent().isZoomed();
+    }
+
     private class PagerAdapter extends FragmentStatePagerAdapter {
 
         public PagerAdapter() {
@@ -179,6 +198,10 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
             return ViewerFragment.newFragment(
                     images.get(position).getUrl(),
                     position == index);
+        }
+
+        public ViewerFragment getCurrent() {
+            return (ViewerFragment) adapter.instantiateItem(pager, pager.getCurrentItem());
         }
 
     }

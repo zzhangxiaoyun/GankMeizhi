@@ -111,4 +111,8 @@ public class ViewerFragment extends Fragment implements Callback {
         return image;
     }
 
+    boolean isZoomed() {
+        return image.isZoomed();
+    }
+
 }
