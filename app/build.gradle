@@ -49,20 +49,40 @@ android {
     }
 
     productFlavors {
-        GitHub {
+        github {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "GitHub"]
         }
 
-        FIR {
+        fir {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "FIR"]
         }
 
-        Google {
+        google {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Google"]
         }
 
-        Wandoujia {
+        wandoujia {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Wandoujia"]
+        }
+
+        xiaomi {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Xiaomi"]
+        }
+
+        meizu {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Meizu"]
+        }
+
+        baidu {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Baidu"]
+        }
+
+        nione {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "91"]
+        }
+
+        hiapk {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "HiApk"]
         }
     }
 
