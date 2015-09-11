@@ -86,6 +86,7 @@ public class ViewerFragment extends Fragment implements RequestListener<String, 
         Glide.with(this)
                 .load(url)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .crossFade(0)
                 .listener(this)
                 .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
     }
