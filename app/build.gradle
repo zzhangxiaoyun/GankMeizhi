@@ -65,10 +65,6 @@ android {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Wandoujia"]
         }
 
-        xiaomi {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Xiaomi"]
-        }
-
         meizu {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Meizu"]
         }
