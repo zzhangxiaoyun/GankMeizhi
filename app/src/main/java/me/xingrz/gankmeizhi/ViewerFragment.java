@@ -24,15 +24,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.ortiz.touch.TouchImageView;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ViewerFragment extends Fragment implements Callback {
+public class ViewerFragment extends Fragment implements RequestListener<String, GlideDrawable> {
 
     private static final String TAG = "ViewerFragment";
 
@@ -80,19 +83,31 @@ public class ViewerFragment extends Fragment implements Callback {
     @Override
     public void onResume() {
         super.onResume();
-        Picasso.with(activity)
+        Glide.with(this)
                 .load(url)
-                .into(image, this);
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(this)
+                .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
     }
 
     @Override
-    public void onSuccess() {
+    public boolean onException(Exception e,
+                               String model,
+                               Target<GlideDrawable> target,
+                               boolean isFirstResource) {
         maybeStartPostponedEnterTransition();
+        return true;
     }
 
     @Override
-    public void onError() {
+    public boolean onResourceReady(GlideDrawable resource,
+                                   String model,
+                                   Target<GlideDrawable> target,
+                                   boolean isFromMemoryCache,
+                                   boolean isFirstResource) {
+        image.setImageDrawable(resource);
         maybeStartPostponedEnterTransition();
+        return true;
     }
 
     private void maybeStartPostponedEnterTransition() {

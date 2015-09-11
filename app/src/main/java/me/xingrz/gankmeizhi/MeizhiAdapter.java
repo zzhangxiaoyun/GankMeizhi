@@ -24,7 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -50,8 +51,14 @@ public abstract class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, M
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ImageWrapper image = get(position);
+
         holder.imageView.setOriginalSize(image.width, image.height);
-        Picasso.with(context).load(image.url).into(holder.imageView);
+
+        Glide.with(context)
+                .load(image.url)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(holder.imageView);
+
         ViewCompat.setTransitionName(holder.imageView, image.url);
     }
 

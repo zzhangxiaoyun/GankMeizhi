@@ -300,12 +300,11 @@ public class MainActivity extends AppCompatActivity
 
         final int index = reenterState.getInt("index", 0);
 
+        content.smoothScrollToPosition(index);
         content.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 content.getViewTreeObserver().removeOnPreDrawListener(this);
-                content.requestLayout();
-                content.scrollToPosition(index);
                 supportStartPostponedEnterTransition();
                 return true;
             }

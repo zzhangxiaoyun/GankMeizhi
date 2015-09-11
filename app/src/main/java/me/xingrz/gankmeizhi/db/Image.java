@@ -22,6 +22,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
@@ -47,10 +48,10 @@ public class Image extends RealmObject {
                 .findAllSorted("publishedAt", RealmResults.SORT_ORDER_DESCENDING);
     }
 
-    public static Image persist(Image image, ImageFetcher imageFetcher) throws IOException {
+    public static Image persist(Image image, ImageFetcher imageFetcher)
+            throws IOException, InterruptedException, ExecutionException {
         Point size = new Point();
 
-        // TODO: 这样首次抓取的时候要多抓取一次用于测量尺寸，会耗费多一次。以后再优化
         imageFetcher.prefetchImage(image.getUrl(), size);
 
         image.setWidth(size.x);

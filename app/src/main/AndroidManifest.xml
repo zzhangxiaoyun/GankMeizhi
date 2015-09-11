@@ -44,6 +44,10 @@
             android:name="UMENG_CHANNEL"
             android:value="${UMENG_CHANNEL_VALUE}" />
 
+        <meta-data
+            android:name="com.bumptech.glide.integration.okhttp.OkHttpGlideModule"
+            android:value="GlideModule" />
+
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">

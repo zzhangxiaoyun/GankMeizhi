@@ -18,22 +18,23 @@ package me.xingrz.gankmeizhi;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.Target;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
@@ -226,7 +227,7 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
         try {
             realm.copyToRealm(Image.persist(image, this));
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException | ExecutionException e) {
             Log.e(TAG, "Failed to fetch image", e);
             realm.cancelTransaction();
             return false;
@@ -237,16 +238,17 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
     }
 
     @Override
-    public void prefetchImage(String url, Point measured) throws IOException {
-        Response response = client.newCall(new Request.Builder().url(url).build()).execute();
+    public void prefetchImage(String url, Point measured)
+            throws IOException, InterruptedException, ExecutionException {
+        Bitmap bitmap = Glide.with(this)
+                .load(url).asBitmap()
+                .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                .get();
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
+        measured.x = bitmap.getWidth();
+        measured.y = bitmap.getHeight();
 
-        BitmapFactory.decodeStream(response.body().byteStream(), null, options);
-
-        measured.x = options.outWidth;
-        measured.y = options.outHeight;
+        Log.d(TAG, "pre-measured image: " + measured.x + " x " + measured.y + " " + url);
     }
 
 }

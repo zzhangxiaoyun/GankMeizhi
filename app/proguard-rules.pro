@@ -33,6 +33,11 @@
 -keepattributes Exceptions
 
 
+# Glide
+
+-keep public class * implements com.bumptech.glide.module.GlideModule
+
+
 # Support Design Library
 
 -keep class * extends android.support.design.widget.CoordinatorLayout$Behavior {
