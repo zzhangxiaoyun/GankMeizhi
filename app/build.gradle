@@ -18,7 +18,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.0"
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
         applicationId "me.xingrz.gankmeizhi"
@@ -27,8 +27,8 @@ android {
 
         targetSdkVersion 23
 
-        versionCode 6
-        versionName "1.4"
+        versionCode 150
+        versionName "1.5"
 
         manifestPlaceholders = [UMENG_CHANNEL_VALUE: "GitHub"]
     }
@@ -89,6 +89,7 @@ android {
 
 dependencies {
     compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:cardview-v7:23.0.1'
     compile 'com.android.support:recyclerview-v7:23.0.1'
 
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'

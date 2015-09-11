@@ -32,6 +32,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -44,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.Bind;
+import butterknife.BindColor;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -67,6 +70,9 @@ public class MainActivity extends AppCompatActivity
     @Bind(R.id.content)
     RecyclerView content;
 
+    @BindColor(R.color.primary)
+    int colorPrimary;
+
     private Realm realm;
 
     private MeizhiAdapter adapter;
@@ -89,18 +95,16 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(toolbar);
 
-        final int colorPrimaryDark = getResources().getColor(R.color.primary_dark);
-
         final SystemBarTintManager tintManager = new SystemBarTintManager(this);
         tintManager.setStatusBarTintEnabled(true);
-        tintManager.setStatusBarTintColor(colorPrimaryDark);
+        tintManager.setStatusBarTintColor(colorPrimary);
         tintManager.setStatusBarAlpha(1.0f);
 
         appbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
                 tintManager.setStatusBarTintColor(ColorMixer.mix(
-                        colorPrimaryDark, Color.BLACK,
+                        colorPrimary, Color.BLACK,
                         (float) -i / (float) appBarLayout.getHeight()));
             }
         });
@@ -309,6 +313,23 @@ public class MainActivity extends AppCompatActivity
                 return true;
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.about:
+                startActivity(new Intent(this, AboutActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private class UpdateResultReceiver extends BroadcastReceiver {

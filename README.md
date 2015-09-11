@@ -24,7 +24,7 @@
 - Android Studio 1.4 Beta 以上 (canary channel)
 - Android 6.0 (API 23) SDK Platform
 - Android Support Library 23.0.1
-- Android Build-tools 23.0.0
+- Android Build-tools 23.0.1
 
 ## 致谢
 
