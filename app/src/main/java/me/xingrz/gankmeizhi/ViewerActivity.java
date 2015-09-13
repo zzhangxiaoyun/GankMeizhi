@@ -131,7 +131,6 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
     }
 
     @OnPageChange(value = R.id.pager, callback = OnPageChange.Callback.PAGE_SCROLL_STATE_CHANGED)
-    @SuppressWarnings("unused")
     void onPageChange(int state) {
         if (state == ViewPager.SCROLL_STATE_DRAGGING) {
             hideSystemUi();

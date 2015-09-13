@@ -166,12 +166,7 @@ public class AboutActivity extends AppCompatActivity {
             public ItemViewHolder(View itemView) {
                 super(itemView);
                 ButterKnife.bind(this, itemView);
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        handleItemClick(getAdapterPosition());
-                    }
-                });
+                itemView.setOnClickListener(v -> handleItemClick(getAdapterPosition()));
             }
 
         }

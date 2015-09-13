@@ -5,6 +5,9 @@
 }
 
 
+-dontwarn java.lang.invoke.*
+
+
 # Butter Knife
 
 -keep class butterknife.** { *; }

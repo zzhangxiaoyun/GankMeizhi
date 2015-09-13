@@ -100,14 +100,10 @@ public class MainActivity extends AppCompatActivity
         tintManager.setStatusBarTintColor(colorPrimary);
         tintManager.setStatusBarAlpha(1.0f);
 
-        appbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+        appbar.addOnOffsetChangedListener((appBarLayout, i) ->
                 tintManager.setStatusBarTintColor(ColorMixer.mix(
-                        colorPrimary, Color.BLACK,
-                        (float) -i / (float) appBarLayout.getHeight()));
-            }
-        });
+                        colorPrimary, Color.BLACK, (float) -i / (float) appbar.getHeight()
+                )));
 
         refresher.setColorSchemeResources(R.color.primary);
         refresher.setOnRefreshListener(this);
@@ -255,12 +251,7 @@ public class MainActivity extends AppCompatActivity
         intent.setAction(MeizhiFetchingService.ACTION_FETCH_FORWARD);
         startService(intent);
 
-        refresher.post(new Runnable() {
-            @Override
-            public void run() {
-                refresher.setRefreshing(true);
-            }
-        });
+        refresher.post(() -> refresher.setRefreshing(true));
 
         isFetching = true;
     }
@@ -274,12 +265,7 @@ public class MainActivity extends AppCompatActivity
         intent.setAction(MeizhiFetchingService.ACTION_FETCH_BACKWARD);
         startService(intent);
 
-        refresher.post(new Runnable() {
-            @Override
-            public void run() {
-                refresher.setRefreshing(true);
-            }
-        });
+        refresher.post(() -> refresher.setRefreshing(true));
 
         isFetching = true;
     }

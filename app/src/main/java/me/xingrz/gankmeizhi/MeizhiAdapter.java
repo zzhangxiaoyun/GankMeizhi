@@ -77,12 +77,7 @@ public abstract class MeizhiAdapter extends ArrayRecyclerAdapter<ImageWrapper, M
         public ViewHolder(@LayoutRes int resource, ViewGroup parent) {
             super(inflater.inflate(resource, parent, false));
             ButterKnife.bind(this, itemView);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onItemClick(v, getAdapterPosition());
-                }
-            });
+            itemView.setOnClickListener(v -> onItemClick(v, getAdapterPosition()));
         }
 
     }

@@ -118,7 +118,6 @@ public class ViewerFragment extends Fragment implements RequestListener<String, 
     }
 
     @OnClick(R.id.picture)
-    @SuppressWarnings("unused")
     void toggleToolbar() {
         activity.toggleToolbar();
     }
