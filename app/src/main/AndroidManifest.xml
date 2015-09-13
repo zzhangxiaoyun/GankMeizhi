@@ -23,12 +23,6 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <permission
-        android:name="me.xingrz.gankmeizhi.ACCESS_UPDATE_RESULT"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name="me.xingrz.gankmeizhi.ACCESS_UPDATE_RESULT" />
-
     <application
         android:name=".MeizhiApplication"
         android:allowBackup="false"

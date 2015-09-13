@@ -26,6 +26,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -77,6 +78,8 @@ public class MainActivity extends AppCompatActivity
 
     private MeizhiAdapter adapter;
     private StaggeredGridLayoutManager layoutManager;
+
+    private LocalBroadcastManager localBroadcastManager;
 
     private UpdateResultReceiver updateResultReceiver = new UpdateResultReceiver();
 
@@ -146,6 +149,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+
         if (populate() == 0) {
             fetchForward();
         }
@@ -164,16 +169,15 @@ public class MainActivity extends AppCompatActivity
 
         MobclickAgent.onResume(this);
 
-        registerReceiver(updateResultReceiver,
-                new IntentFilter(MeizhiFetchingService.ACTION_UPDATE_RESULT),
-                MeizhiFetchingService.PERMISSION_ACCESS_UPDATE_RESULT, null);
+        localBroadcastManager.registerReceiver(updateResultReceiver,
+                new IntentFilter(MeizhiFetchingService.ACTION_UPDATE_RESULT));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         MobclickAgent.onPause(this);
-        unregisterReceiver(updateResultReceiver);
+        localBroadcastManager.unregisterReceiver(updateResultReceiver);
     }
 
     @Override

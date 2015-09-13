@@ -20,6 +20,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -48,7 +49,7 @@ import retrofit.Retrofit;
 
 /**
  * 数据抓取服务
- * <p/>
+ * <p>
  * 之所以用 {@link IntentService}，是因为可以在它的 {@link #onHandleIntent(Intent)} 里跑同步代码，系统会把
  * 它跑在后台线程中，切保证同一时间只有一个任务在跑。
  *
@@ -60,8 +61,6 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
     public static final String EXTRA_FETCHED = "fetched";
     public static final String EXTRA_TRIGGER = "trigger";
-
-    public static final String PERMISSION_ACCESS_UPDATE_RESULT = "me.xingrz.gankmeizhi.ACCESS_UPDATE_RESULT";
 
     public static final String ACTION_FETCH_FORWARD = "me.xingrz.gankmeizhi.FETCH_FORWARD";
 
@@ -96,8 +95,16 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
 
     private final GankApi gankApi = retrofit.create(GankApi.class);
 
+    private LocalBroadcastManager localBroadcastManager;
+
     public MeizhiFetchingService() {
         super(TAG);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
 
     @Override
@@ -131,7 +138,7 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
         broadcast.putExtra(EXTRA_FETCHED, fetched);
         broadcast.putExtra(EXTRA_TRIGGER, intent.getAction());
 
-        sendBroadcast(broadcast, PERMISSION_ACCESS_UPDATE_RESULT);
+        localBroadcastManager.sendBroadcast(broadcast);
     }
 
     private int fetchLatest(Realm realm) throws IOException {
