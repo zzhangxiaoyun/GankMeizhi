@@ -8,7 +8,7 @@
 本项目包含以下知识点：
 
 - [Butter Knife](http://jakewharton.github.io/butterknife/)：通过注解绑定 View
-- [Picasso](https://square.github.io/picasso/) 图片加载
+- [Glide](https://github.com/bumptech/glide) 图片加载
 - [Realm](https://realm.io) 数据库与 [Retrofit](https://square.github.io/retrofit/) RESTful API 框架的配合
 - `RecyclerView` 及 `StaggeredGridLayoutManager` 瀑布流布局
 - `IntentService` 实现的后台网络请求
