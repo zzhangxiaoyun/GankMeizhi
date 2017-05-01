@@ -32,27 +32,24 @@ import me.xingrz.gankmeizhi.net.ImageFetcher;
 
 public class Image extends RealmObject {
 
-    @PrimaryKey
-    @SerializedName("objectId")
-    private String id;
 
-    private String url;
+    private int id;
+    private String picurl;
+    private String title;
 
     private int width;
     private int height;
 
-    private Date publishedAt;
 
     public static RealmResults<Image> all(Realm realm) {
-        return realm.where(Image.class)
-                .findAllSorted("publishedAt", RealmResults.SORT_ORDER_DESCENDING);
+        return realm.where(Image.class).findAll();//.findAllSorted("publishedAt", RealmResults.SORT_ORDER_DESCENDING);
     }
 
     public static Image persist(Image image, ImageFetcher imageFetcher)
             throws IOException, InterruptedException, ExecutionException {
         Point size = new Point();
 
-        imageFetcher.prefetchImage(image.getUrl(), size);
+        imageFetcher.prefetchImage(image.getPicurl(), size);
 
         image.setWidth(size.x);
         image.setHeight(size.y);
@@ -60,20 +57,12 @@ public class Image extends RealmObject {
         return image;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public int getWidth() {
@@ -92,12 +81,19 @@ public class Image extends RealmObject {
         this.height = height;
     }
 
-    public Date getPublishedAt() {
-        return publishedAt;
+    public String getPicurl() {
+        return picurl;
     }
 
-    public void setPublishedAt(Date publishedAt) {
-        this.publishedAt = publishedAt;
+    public void setPicurl(String picurl) {
+        this.picurl = picurl;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 }

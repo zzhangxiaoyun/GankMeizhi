@@ -88,7 +88,7 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
             .create();
 
     private final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("https://gank.avosapps.com/api/")
+            .baseUrl("http://www.bytespace.cn/pic/")
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build();
@@ -120,11 +120,11 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
                 Log.d(TAG, "no latest, fresh fetch");
                 fetched = fetchLatest(realm);
             } else if (ACTION_FETCH_FORWARD.equals(intent.getAction())) {
-                Log.d(TAG, "latest fetch: " + latest.first().getUrl());
-                fetched = fetchSince(realm, latest.first().getPublishedAt());
+                Log.d(TAG, "latest fetch: " + latest.first().getPicurl());
+//                fetched = fetchSince(realm, latest.first().getPublishedAt());
             } else if (ACTION_FETCH_BACKWARD.equals(intent.getAction())) {
-                Log.d(TAG, "earliest fetch: " + latest.last().getUrl());
-                fetched = fetchBefore(realm, latest.last().getPublishedAt());
+                Log.d(TAG, "earliest fetch: " + latest.last().getPicurl());
+//                fetched = fetchBefore(realm, latest.last().getPublishedAt());
             }
         } catch (IOException e) {
             Log.e(TAG, "failed to issue network request", e);
@@ -142,19 +142,21 @@ public class MeizhiFetchingService extends IntentService implements ImageFetcher
     }
 
     private int fetchLatest(Realm realm) throws IOException {
-        GankApi.Result<List<Image>> result = gankApi.latest(COUNT_PER_FETCH).execute().body();
+        GankApi.Response<GankApi.Page<Image>> result = gankApi.latest(60, 1).execute().body();
 
-        if (result.error) {
-            return 0;
-        }
+//        GankApi.Result<List<Image>> result = gankApi.latest(30, 1).execute().body();
+//
+//        if (result.error) {
+//            return 0;
+//        }
 
-        for (int i = 0; i < result.results.size(); i++) {
-            if (!saveToDb(realm, result.results.get(i))) {
+        for (int i = 0; i < result.result.list.size(); i++) {
+            if (!saveToDb(realm, result.result.list.get(i))) {
                 return i;
             }
         }
 
-        return result.results.size();
+        return result.result.list.size();
     }
 
     private int fetchSince(Realm realm, Date sinceDate) throws IOException {

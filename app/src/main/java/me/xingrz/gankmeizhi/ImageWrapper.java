@@ -26,7 +26,7 @@ public class ImageWrapper {
     public final int height;
 
     private ImageWrapper(Image image) {
-        this.url = image.getUrl();
+        this.url = image.getPicurl();
         this.width = image.getWidth();
         this.height = image.getHeight();
     }

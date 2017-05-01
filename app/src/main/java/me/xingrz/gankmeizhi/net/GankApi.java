@@ -18,17 +18,18 @@ package me.xingrz.gankmeizhi.net;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import me.xingrz.gankmeizhi.db.Image;
 import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Path;
+import retrofit.http.Query;
 
 public interface GankApi {
-
-    @GET("data/%E7%A6%8F%E5%88%A9/{count}/1")
-    Call<Result<List<Image>>> latest(@Path("count") int count);
+    @GET("picsets")
+    Call<GankApi.Response<GankApi.Page<Image>>> latest(@Query("pagesize") int pagesize, @Query("pageindex") int pageindex);
 
     @GET("get/{count}/since/{year}/{month}/{day}")
     Call<Result<List<String>>> since(@Path("count") int count,
@@ -53,6 +54,17 @@ public interface GankApi {
 
         public T results;
 
+    }
+
+    class Response<T>{
+        public String message;
+        public int returncode;
+        public T result;
+    }
+
+    class Page<T>{
+        public List<T> list = new ArrayList<T>();
+        public int pageCount;
     }
 
     class Article {

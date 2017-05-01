@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MobclickAgent.updateOnlineConfig(this);
+//        MobclickAgent.updateOnlineConfig(this);
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);

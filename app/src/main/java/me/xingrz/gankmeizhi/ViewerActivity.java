@@ -100,7 +100,7 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
             public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
                 Image image = images.get(pager.getCurrentItem());
                 sharedElements.clear();
-                sharedElements.put(image.getUrl(), adapter.getCurrent().getSharedElement());
+                sharedElements.put(image.getPicurl(), adapter.getCurrent().getSharedElement());
             }
         });
     }
@@ -195,7 +195,7 @@ public class ViewerActivity extends AppCompatActivity implements RealmChangeList
         @Override
         public Fragment getItem(int position) {
             return ViewerFragment.newFragment(
-                    images.get(position).getUrl(),
+                    images.get(position).getPicurl(),
                     position == index);
         }
 
